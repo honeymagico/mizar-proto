@@ -1,0 +1,185 @@
+syntax = "proto3";
+
+package mizar.quote;
+
+option go_package = "github.com/mizar/mizar-proto/proto/mizar";
+
+import "mizar_common.proto";
+
+// =============================================================================
+// ENUM 定義區
+// =============================================================================
+
+
+
+// 報價類型
+enum QuoteType {
+  QUOTE_TYPE_UNSPECIFIED = 0; // 未指定
+  QUOTE_TYPE_TICK = 1;        // 逐筆資料
+  QUOTE_TYPE_BIDASK = 2;      // 買賣價量
+  QUOTE_TYPE_QUOTE = 3;       // 整股報價
+}
+
+
+
+// =============================================================================
+// 一般 MESSAGE 定義區
+// =============================================================================
+
+// TICK 資料陣列格式
+message TickDataList {
+  repeated int64 timestamps = 1;               // 納秒時間戳陣列
+  repeated double close_prices = 2;            // 成交價陣列
+  repeated int32 volumes = 3;                  // 成交量陣列
+  repeated double bid_prices = 4;              // 買價陣列
+  repeated int32 bid_volumes = 5;              // 買量陣列
+  repeated double ask_prices = 6;              // 賣價陣列
+  repeated int32 ask_volumes = 7;              // 賣量陣列
+  repeated int32 tick_types = 8;               // TICK 類型陣列
+}
+
+// KBAR 資料陣列格式
+message KbarDataList {
+  repeated int64 timestamps = 1;               // 納秒時間戳陣列
+  repeated double open_prices = 2;             // 開盤價陣列
+  repeated double high_prices = 3;             // 最高價陣列
+  repeated double low_prices = 4;              // 最低價陣列
+  repeated double close_prices = 5;            // 收盤價陣列
+  repeated int32 volumes = 6;                  // 成交量陣列
+}
+
+// 市場快照資料
+message MarketSnapshotData {
+  int64 timestamp = 1;                         // 時間戳
+  string contract_code = 2;                    // 合約代碼
+  double open = 3;                             // 開盤價
+  double high = 4;                             // 最高價
+  double low = 5;                              // 最低價
+  double close = 6;                            // 收盤價
+  double change_price = 7;                     // 漲跌
+  double change_rate = 8;                      // 漲跌幅
+  double average_price = 9;                    // 均價
+  int32 volume = 10;                           // 成交量
+  int32 total_volume = 11;                     // 總成交量
+  int64 amount = 12;                           // 成交金額
+  int64 total_amount = 13;                     // 總成交金額
+  double yesterday_volume = 14;                // 昨量
+  double buy_price = 15;                       // 委買價
+  double buy_volume = 16;                      // 委買量
+  double sell_price = 17;                      // 委賣價
+  int32 sell_volume = 18;                      // 委賣量
+  double volume_ratio = 19;                    // 量比
+}
+
+// 或有券源資料
+message ShortStockSourceData {
+  string contract_code = 1;                    // 合約代碼
+  double short_stock_source = 2;               // 或有券源數量
+  int64 timestamp = 3;                         // 時間戳
+}
+
+// 資券餘額資料
+message CreditEnquireData {
+  string contract_code = 1;                     // 合約代碼
+  string system = 2;                            // 券商系統（HE/HC/HN/HF）- 含義不明
+  int32 margin_unit = 3;                        // 融資餘額
+  int32 short_unit = 4;                         // 融券餘額
+  int64 update_time = 5;                        // 更新時間（納秒時間戳）
+}
+
+// =============================================================================
+// MQ 使用 MESSAGE 定義區
+// =============================================================================
+
+// 訂閱報價請求
+message SubscribeQuoteRequest {
+  string contract_code = 1;                    // 合約代碼（優先使用）
+  string contract_symbol = 2;                  // 合約符號（未提供CODE時用這個）
+  QuoteType quote_type = 3;                    // 報價類型（預設為 TICK）
+  bool intraday_odd = 4;                       // 是否包含盤中零股（預設為 false）
+}
+
+// 訂閱報價回應
+message SubscribeQuoteResponse {
+  mizar.common.ErrorCode error_code = 1;       // 錯誤代碼（0=成功）
+  string error_message = 2;                    // 錯誤訊息
+}
+
+// 取消訂閱報價請求
+message UnsubscribeQuoteRequest {
+  string contract_code = 1;                    // 合約代碼（優先使用）
+  string contract_symbol = 2;                  // 合約符號（未提供CODE時用這個）
+}
+
+// 取消訂閱報價回應
+message UnsubscribeQuoteResponse {
+  mizar.common.ErrorCode error_code = 1;       // 錯誤代碼（0=成功）
+  string error_message = 2;                    // 錯誤訊息
+}
+
+// 取得歷史 TICK 資料請求
+message GetHistoryTickRequest {
+  string contract_code = 1;                    // 合約代碼（優先使用）
+  string contract_symbol = 2;                  // 合約符號（未提供CODE時用這個）
+  string date = 3;                             // 日期（YYYY-MM-DD）
+}
+
+// 取得歷史 TICK 資料回應
+message GetHistoryTickResponse {
+  TickDataList tick_data = 1;                  // TICK 資料陣列
+  mizar.common.ErrorCode error_code = 2;       // 錯誤代碼（0=成功）
+  string error_message = 3;                    // 錯誤訊息
+}
+
+// 取得歷史 KBAR 資料請求
+message GetHistoryKbarRequest {
+  string contract_code = 1;                    // 合約代碼（優先使用）
+  string contract_symbol = 2;                  // 合約符號（未提供CODE時用這個）
+  string date = 3;                             // 日期（YYYY-MM-DD）
+}
+
+// 取得歷史 KBAR 資料回應
+message GetHistoryKbarResponse {
+  KbarDataList kbar_data = 1;                  // KBAR 資料陣列
+  mizar.common.ErrorCode error_code = 2;       // 錯誤代碼（0=成功）
+  string error_message = 3;                    // 錯誤訊息
+}
+
+// 取得市場快照請求
+message GetMarketSnapshotRequest {
+  repeated string contract_codes = 1;           // 合約代碼列表（優先使用）
+  repeated string contract_symbols = 2;         // 合約符號列表（未提供CODE時用這個）
+}
+
+// 取得市場快照回應
+message GetMarketSnapshotResponse {
+  repeated MarketSnapshotData snapshots = 1;    // 快照資料列表
+  mizar.common.ErrorCode error_code = 2;        // 錯誤代碼（0=成功）
+  string error_message = 3;                     // 錯誤訊息
+}
+
+// 取得或有券源請求
+message GetShortStockSourceRequest {
+  repeated string contract_codes = 1;           // 合約代碼列表（優先使用）
+  repeated string contract_symbols = 2;         // 合約符號列表（未提供CODE時用這個）
+}
+
+// 取得或有券源回應
+message GetShortStockSourceResponse {
+  repeated ShortStockSourceData sources = 1;    // 券源資料列表
+  mizar.common.ErrorCode error_code = 2;        // 錯誤代碼（0=成功）
+  string error_message = 3;                     // 錯誤訊息
+}
+
+// 取得資券餘額請求
+message GetCreditEnquireRequest {
+  repeated string contract_codes = 1;            // 合約代碼列表（優先使用）
+  repeated string contract_symbols = 2;          // 合約符號列表（未提供CODE時用這個）
+}
+
+// 取得資券餘額回應
+message GetCreditEnquireResponse {
+  repeated CreditEnquireData credit_data = 1;   // 資券餘額資料列表
+  mizar.common.ErrorCode error_code = 2;        // 錯誤代碼（0=成功）
+  string error_message = 3;                     // 錯誤訊息
+}

@@ -1,0 +1,148 @@
+syntax = "proto3";
+
+package mizar.stream;
+
+option go_package = "github.com/mizar/mizar-proto/proto/mizar";
+
+import "mizar_common.proto";
+
+// =============================================================================
+// ENUM 定義區
+// =============================================================================
+
+// 事件類型
+enum EventType {
+  EVENT_TYPE_UNSPECIFIED = 0;  // 未定義
+  EVENT_TYPE_UP = 1;           // 系統上線
+  EVENT_TYPE_DOWN = 2;         // 系統下線
+}
+
+// =============================================================================
+// 一般 MESSAGE 定義區
+// =============================================================================
+
+// 系統事件資料
+message SystemEvent {
+  EventType event_type = 1;      // 事件類型（UP/DOWN）
+  string event_name = 2;         // 事件名稱
+  string event_description = 3;  // 事件說明
+  int64 timestamp = 4;           // 事件發生時間（納秒時間戳）
+}
+
+// 操作資訊
+message Operation {
+  string op_type = 1;            // 操作類型（New: 新單, Cancel: 刪單, UpdatePrice: 改價, UpdateQty: 改量）
+  string op_code = 2;            // 操作結果代碼（00: 成功, others: 失敗）
+  string op_msg = 3;             // 錯誤訊息
+}
+
+// =============================================================================
+// MQ 使用 MESSAGE 定義區
+// =============================================================================
+
+// 期貨委託回報資料（完整格式）
+message FutureOrderReport {
+  Operation operation = 1;        // 操作資訊
+  mizar.common.Trade trade = 2;   // 完整的委託交易資訊
+}
+
+// 期貨成交回報資料（完整格式）
+message FutureDealReport {
+  string trade_id = 1;           // 與委託回報id相同
+  string seqno = 2;              // 平台單號
+  string ordno = 3;              // 委託單號（前五碼為同委託回報委託單號，後三碼為同筆委託成交交易序號）
+  string exchange_seq = 4;       // 回報序號
+  string broker_id = 5;          // 分行代碼
+  string account_id = 6;         // 帳號
+  string action = 7;             // 買賣別
+  string code = 8;               // 商品代碼
+  double price = 9;              // 成交價
+  int64 quantity = 10;           // 成交量
+  string subaccount = 11;        // 子帳號
+  string security_type = 12;     // 商品類別
+  string delivery_month = 13;    // 交割月份
+  double strike_price = 14;      // 履約價
+  string option_right = 15;      // 期權權利（Future, OptionCall, OptionPut）
+  string market_type = 16;       // 市場別（Day, Night）
+  bool combo = 17;               // 是否為組合單
+  int64 ts = 18;                 // 成交時間戳（納秒）
+}
+
+// 股票 TICK 資料
+message StockTick {
+  string code = 1;                // 商品代碼（如：2330）
+  string symbol = 2;              // 商品符號（如：2330）
+  int64 timestamp = 3;            // TICK 時間戳（納秒）
+  double price = 4;               // 成交價
+  int64 volume = 5;               // 成交量
+  double bid_price = 6;           // 買價
+  int64 bid_volume = 7;           // 買量
+  double ask_price = 8;           // 賣價
+  int64 ask_volume = 9;           // 賣量
+  double open_price = 10;         // 開盤價
+  double high_price = 11;         // 最高價
+  double low_price = 12;          // 最低價
+  double close_price = 13;        // 收盤價
+  int64 total_volume = 14;        // 總成交量
+  double total_amount = 15;       // 總成交金額
+  int64 tick_count = 16;          // TICK 計數
+}
+
+// 股票買賣價量資料
+message StockBidAsk {
+  string code = 1;                // 商品代碼（如：2330）
+  string symbol = 2;              // 商品符號（如：2330）
+  int64 timestamp = 3;            // 時間戳（納秒）
+  repeated double bid_price = 4;  // 買價陣列（5檔）
+  repeated int64 bid_volume = 5;  // 買量陣列（5檔）
+  repeated int64 diff_bid_vol = 6; // 買價增減量陣列（5檔）
+  repeated double ask_price = 7;  // 賣價陣列（5檔）
+  repeated int64 ask_volume = 8;  // 賣量陣列（5檔）
+  repeated int64 diff_ask_vol = 9; // 賣價增減量陣列（5檔）
+  bool suspend = 10;              // 暫停交易
+  bool simtrade = 11;             // 試撮
+}
+
+// 期貨 TICK 資料
+message FutureTick {
+  string code = 1;                // 商品代碼（如：TXFG4）
+  string symbol = 2;              // 商品符號（如：TXF202402）
+  int64 timestamp = 3;            // TICK 時間戳（納秒）
+  double price = 4;               // 成交價
+  int64 volume = 5;               // 成交量（口）
+  double underlying_price = 6;    // 標的物價格
+  int64 bid_side_total_vol = 7;   // 買盤成交總量（口）
+  int64 ask_side_total_vol = 8;   // 賣盤成交總量（口）
+  double avg_price = 9;           // 均價
+  double open_price = 10;         // 開盤價
+  double high_price = 11;         // 最高價
+  double low_price = 12;          // 最低價
+  double total_amount = 13;       // 總成交額
+  int64 total_volume = 14;        // 總成交量（口）
+  mizar.common.TickType tick_type = 15;        // 內外盤別
+  mizar.common.ChangeType chg_type = 16;       // 漲跌註記
+  double price_chg = 17;          // 漲跌
+  double pct_chg = 18;            // 漲跌幅（%）
+  mizar.common.SimTradeType simtrade = 19;     // 試撮狀態
+}
+
+// 期貨買賣價量資料
+message FutureBidAsk {
+  string code = 1;                // 商品代碼（如：TXFG4）
+  string symbol = 2;              // 商品符號（如：TXF202402）
+  int64 timestamp = 3;            // 時間戳（納秒）
+  int64 bid_total_vol = 4;        // 買盤總量（口）
+  int64 ask_total_vol = 5;        // 賣盤總量（口）
+  repeated double bid_price = 6;  // 買價陣列（5檔）
+  repeated int64 bid_volume = 7;  // 買量陣列（5檔）
+  repeated int64 diff_bid_vol = 8; // 買價增減量陣列（5檔）
+  repeated double ask_price = 9;  // 賣價陣列（5檔）
+  repeated int64 ask_volume = 10; // 賣量陣列（5檔）
+  repeated int64 diff_ask_vol = 11; // 賣價增減量陣列（5檔）
+  double first_derived_bid_price = 12; // 衍生一檔委買價
+  int64 first_derived_bid_vol = 13;    // 衍生一檔委買量
+  double first_derived_ask_price = 14; // 衍生一檔委賣價
+  int64 first_derived_ask_vol = 15;    // 衍生一檔委賣量
+  double underlying_price = 16;   // 標的物價格
+  mizar.common.SimTradeType simtrade = 17;     // 試撮狀態
+} 

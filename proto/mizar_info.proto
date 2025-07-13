@@ -1,0 +1,152 @@
+syntax = "proto3";
+
+package mizar.info;
+
+option go_package = "github.com/mizar/mizar-proto/proto/mizar";
+
+import "mizar_common.proto";
+
+// =============================================================================
+// ENUM 定義區
+// =============================================================================
+
+
+
+// 交易所類型
+enum Exchange {
+  EXCHANGE_UNSPECIFIED = 0;  // 未指定
+  EXCHANGE_TSE = 1;          // 台灣證券交易所
+  EXCHANGE_OTC = 2;          // 櫃買中心
+  EXCHANGE_OES = 3;          // 興櫃
+}
+
+// 當沖類型
+enum DayTrade {
+  DAY_TRADE_UNSPECIFIED = 0; // 未指定
+  DAY_TRADE_YES = 1;         // 可當沖
+  DAY_TRADE_NO = 2;          // 不可當沖
+  DAY_TRADE_ONLY_BUY = 3;    // 僅可買入當沖
+}
+
+// 選擇權權利類型
+enum OptionRight {
+  OPTION_RIGHT_UNSPECIFIED = 0; // 未指定
+  OPTION_RIGHT_CALL = 1;        // 買權
+  OPTION_RIGHT_PUT = 2;         // 賣權
+}
+
+// 合約類型
+enum ContractType {
+  CONTRACT_TYPE_UNSPECIFIED = 0;   // 未指定
+  CONTRACT_TYPE_STOCK = 1;         // 證券
+  CONTRACT_TYPE_FUTURE = 2;        // 期貨
+  CONTRACT_TYPE_OPTION = 3;        // 選擇權
+  CONTRACT_TYPE_INDEX = 4;         // 指數
+}
+
+// =============================================================================
+// 一般 MESSAGE 定義區
+// =============================================================================
+
+// 期貨帳號資訊
+message FutureAccount {
+  string person_id = 1;      // 個人識別碼
+  string broker_id = 2;      // 券商識別碼
+  string account_id = 3;     // 帳號識別碼
+  bool signed = 4;           // 是否已簽署
+  string username = 5;       // 使用者名稱
+}
+
+// 證券合約資訊
+message Stock {
+  Exchange exchange = 1;           // 交易所
+  string code = 2;                 // 商品代碼
+  string symbol = 3;               // 符號
+  string name = 4;                 // 商品名稱
+  string category = 5;             // 類別
+  int32 unit = 6;                  // 單位
+  double limit_up = 7;             // 漲停價
+  double limit_down = 8;           // 跌停價
+  double reference = 9;            // 參考價
+  string update_date = 10;         // 更新日期
+  int32 margin_trading_balance = 11; // 融資餘額
+  int32 short_selling_balance = 12;  // 融券餘額
+  DayTrade day_trade = 13;         // 可否當沖
+}
+
+// 期貨合約資訊
+message Future {
+  string code = 1;                 // 商品代碼
+  string symbol = 2;               // 符號
+  string name = 3;                 // 商品名稱
+  string category = 4;             // 類別
+  string delivery_month = 5;       // 交割月份
+  string delivery_date = 6;        // 結算日
+  string underlying_kind = 7;      // 標的類型
+  int32 unit = 8;                  // 單位
+  double limit_up = 9;             // 漲停價
+  double limit_down = 10;          // 跌停價
+  double reference = 11;           // 參考價
+  string update_date = 12;         // 更新時間
+}
+
+// 選擇權合約資訊
+message Option {
+  string code = 1;                 // 商品代碼
+  string symbol = 2;               // 符號
+  string name = 3;                 // 商品名稱
+  string category = 4;             // 類型
+  string delivery_month = 5;       // 交割月份
+  string delivery_date = 6;        // 交割日期
+  double strike_price = 7;         // 履約價
+  OptionRight option_right = 8;    // 買賣權別
+  string underlying_kind = 9;      // 標的類型
+  int32 unit = 10;                 // 單位
+  double limit_up = 11;            // 漲停價
+  double limit_down = 12;          // 跌停價
+  double reference = 13;           // 參考價
+  string update_date = 14;         // 更新時間
+}
+
+// 指數合約資訊
+message Index {
+  Exchange exchange = 1;           // 交易所
+  string code = 2;                 // 商品代碼
+  string symbol = 3;               // 符號
+  string name = 4;                 // 商品名稱
+}
+
+// 合約資訊集合
+message ContractCollection {
+  repeated Stock stocks = 1;        // 證券合約列表
+  repeated Future futures = 2;      // 期貨合約列表
+  repeated Option options = 3;      // 選擇權合約列表
+  repeated Index indexes = 4;       // 指數合約列表
+}
+
+// =============================================================================
+// MQ 使用 MESSAGE 定義區
+// =============================================================================
+
+// 取得期貨預設帳號請求
+message GetFutureAccountRequest {
+}
+
+// 取得期貨預設帳號回應
+message GetFutureAccountResponse {
+  FutureAccount account = 1; // 期貨帳號資訊
+  mizar.common.ErrorCode error_code = 2;  // 錯誤代碼（0=成功）
+  string error_message = 3;  // 錯誤訊息
+}
+
+// 取得合約資訊請求
+message GetContractRequest {
+  ContractType contract_type = 1;  // 合約類型（可選，不指定則取得全部）
+}
+
+// 取得合約資訊回應
+message GetContractResponse {
+  ContractCollection contracts = 1; // 合約資訊集合
+  mizar.common.ErrorCode error_code = 2;         // 錯誤代碼（0=成功）
+  string error_message = 3;         // 錯誤訊息
+} 

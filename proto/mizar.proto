@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package mizar;
+
+option go_package = "github.com/mizar/mizar-proto/proto/mizar";
+
+// =============================================================================
+// 引用所有子模組
+// =============================================================================
+
+import "mizar_info.proto";
+import "mizar_quote.proto";
+import "mizar_portfolio.proto";
+import "mizar_trade.proto";
+import "mizar_stream.proto"; 

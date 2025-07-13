@@ -1,0 +1,148 @@
+syntax = "proto3";
+
+package mizar.common;
+
+option go_package = "github.com/mizar/mizar-proto/proto/mizar";
+
+// =============================================================================
+// 共用 ENUM 定義區
+// =============================================================================
+
+// 錯誤代碼
+enum ErrorCode {
+  ERROR_CODE_SUCCESS = 0;        // 成功
+  ERROR_CODE_API_NOT_READY = 1;  // API 未就緒（連線失敗）
+  ERROR_CODE_RATE_LIMIT = 2;     // 流量限制
+  ERROR_CODE_INTERNAL_ERROR = 99; // 內部錯誤（未預期的錯誤）
+}
+
+// 買賣方向
+enum Action {
+  ACTION_UNSPECIFIED = 0;  // 未定義
+  ACTION_BUY = 1;          // 買
+  ACTION_SELL = 2;         // 賣
+}
+
+// 價格類型
+enum PriceType {
+  PRICE_TYPE_UNSPECIFIED = 0;  // 未定義
+  PRICE_TYPE_LMT = 1;          // 限價
+  PRICE_TYPE_MKT = 2;          // 市價
+  PRICE_TYPE_MKP = 3;          // 範圍市價
+}
+
+// 委託類別
+enum OrderType {
+  ORDER_TYPE_UNSPECIFIED = 0;  // 未定義
+  ORDER_TYPE_ROD = 1;          // ROD（當日有效）
+  ORDER_TYPE_IOC = 2;          // IOC（立即成交否則取消）
+  ORDER_TYPE_FOK = 3;          // FOK（全部成交否則取消）
+}
+
+// 委託性質
+enum OcType {
+  OC_TYPE_UNSPECIFIED = 0;  // 未定義
+  OC_TYPE_AUTO = 1;         // 自動
+  OC_TYPE_NEW = 2;          // 新倉
+  OC_TYPE_COVER = 3;        // 平倉
+  OC_TYPE_DAY_TRADE = 4;    // 當沖
+}
+
+// 委託狀態
+enum OrderStatus {
+  ORDER_STATUS_UNSPECIFIED = 0;     // 未定義
+  ORDER_STATUS_CANCELLED = 1;       // 已刪除
+  ORDER_STATUS_FILLED = 2;          // 完全成交
+  ORDER_STATUS_PART_FILLED = 3;     // 部分成交
+  ORDER_STATUS_FAILED = 4;          // 失敗
+  ORDER_STATUS_PENDING_SUBMIT = 5;  // 傳送中
+  ORDER_STATUS_PRE_SUBMITTED = 6;   // 預約單
+  ORDER_STATUS_SUBMITTED = 7;       // 傳送成功
+}
+
+// 內外盤別
+enum TickType {
+  TICK_TYPE_UNKNOWN = 0;         // 無法判定
+  TICK_TYPE_OUTSIDE = 1;         // 外盤
+  TICK_TYPE_INSIDE = 2;          // 內盤
+}
+
+// 漲跌註記
+enum ChangeType {
+  CHANGE_TYPE_UNKNOWN = 0;       // 未知
+  CHANGE_TYPE_LIMIT_UP = 1;      // 漲停
+  CHANGE_TYPE_UP = 2;            // 漲
+  CHANGE_TYPE_FLAT = 3;          // 平盤
+  CHANGE_TYPE_DOWN = 4;          // 跌
+  CHANGE_TYPE_LIMIT_DOWN = 5;    // 跌停
+}
+
+// 試撮狀態
+enum SimTradeType {
+  SIM_TRADE_TYPE_NORMAL = 0;     // 正常交易
+  SIM_TRADE_TYPE_SIMULATION = 1; // 試撮
+}
+
+
+// =============================================================================
+// 共用 MESSAGE 定義區
+// =============================================================================
+
+// 成交資訊
+message Deal {
+  string seq = 1;           // 成交序號
+  double price = 2;         // 成交價
+  int64 quantity = 3;       // 成交數量
+  int64 ts = 4;             // 成交時間戳（納秒）
+}
+
+// 委託狀態資訊
+message OrderStatusInfo {
+  string id = 1;                    // 關聯Order物件編碼
+  OrderStatus status = 2;           // 委託狀態
+  string status_code = 3;           // 狀態碼
+  int64 order_datetime = 4;         // 委託時間（納秒時間戳）
+  int64 order_quantity = 5;         // 委託數量
+  double modified_price = 6;        // 改價金額
+  int64 cancel_quantity = 7;        // 取消委託數量
+  repeated Deal deals = 8;          // 成交資訊
+}
+
+// 委託資訊
+message Order {
+  Action action = 1;                // 買賣方向
+  double price = 2;                 // 委託價格
+  int64 quantity = 3;               // 委託數量
+  string id = 4;                    // 委託編號
+  string seqno = 5;                 // 平台單號
+  string ordno = 6;                 // 委託序號
+  string account = 7;               // 帳號
+  string custom_field = 8;          // 自訂欄位
+  PriceType price_type = 9;         // 價格類型
+  OrderType order_type = 10;        // 委託類別
+  bool daytrade_short = 11;         // 當沖賣空（證券用）
+  OcType oc_type = 12;              // 委託性質（期貨用）
+}
+
+// 商品資訊
+message Contract {
+  string code = 1;                  // 商品代碼
+  string symbol = 2;                // 商品符號
+  string name = 3;                  // 商品名稱
+  string category = 4;              // 商品類別
+  int64 unit = 5;                   // 交易單位
+  double limit_up = 6;              // 漲停價
+  double limit_down = 7;            // 跌停價
+  double reference = 8;             // 參考價
+  string update_date = 9;           // 更新日期
+  string delivery_month = 10;       // 到期月份（期貨用）
+  string delivery_date = 11;        // 到期日期（期貨用）
+  string underlying_kind = 12;      // 標的物種類（期貨用）
+}
+
+// 委託交易資訊
+message Trade {
+  Contract contract = 1;            // 商品資訊
+  Order order = 2;                  // 委託資訊
+  OrderStatusInfo status = 3;       // 委託狀態
+} 

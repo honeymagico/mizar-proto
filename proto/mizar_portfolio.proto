@@ -1,0 +1,107 @@
+syntax = "proto3";
+
+package mizar.portfolio;
+
+option go_package = "github.com/mizar/mizar-proto/proto/mizar";
+
+import "mizar_common.proto";
+
+// =============================================================================
+// 一般 MESSAGE 定義區
+// =============================================================================
+
+// 保證金資訊
+message MarginInfo {
+  double yesterday_balance = 1; // 前日餘額
+  double today_balance = 2; // 今日餘額
+  double deposit_withdrawal = 3; // 存提
+  double fee = 4; // 手續費
+  double tax = 5; // 期交稅
+  double initial_margin = 6; // 原始保證金
+  double maintenance_margin = 7; // 維持保證金
+  double margin_call = 8; // 追繳保證金
+  double risk_indicator = 9; // 風險指標
+  double royalty_revenue_expenditure = 10; // 權利金收入與支出
+  double equity = 11; // 權益數
+  double equity_amount = 12; // 權益總值
+  double option_openbuy_market_value = 13; // 未沖銷買方選擇權市值
+  double option_opensell_market_value = 14; // 未沖銷賣方選擇權市值
+  double option_open_position = 15; // 參考未平倉選擇權損益
+  double option_settle_profitloss = 16; // 參考選擇權平倉損益
+  double future_open_position = 17; // 未沖銷期貨浮動損益
+  double today_future_open_position = 18; // 參考當日未沖銷期貨浮動損益
+  double future_settle_profitloss = 19; // 期貨平倉損益
+  double available_margin = 20; // 可動用(出金)保證金
+  double plus_margin = 21; // 依「加收保證金指標」所加收之保證金
+  double plus_margin_indicator = 22; // 加收保證金指標
+  double security_collateral_amount = 23; // 有價證券抵繳總額
+  double order_margin_premium = 24; // 委託保證金及委託權利金
+  double collateral_amount = 25; // 有價品額
+}
+
+// 期貨持倉資訊
+message FuturePosition {
+  int32 id = 1;                         // 部位代碼
+  string code = 2;                      // 商品代碼
+  mizar.common.Action direction = 3;    // 買賣方向
+  int64 quantity = 4;                   // 數量
+  double price = 5;                     // 平均價格
+  double last_price = 6;                // 目前價格
+  double pnl = 7;                       // 損益
+}
+
+// 期貨持倉明細
+message FuturePositionDetail {
+  string date = 1;                      // 交易日期
+  string code = 2;                      // 商品代碼
+  int64 quantity = 3;                   // 數量
+  double price = 4;                     // 價格
+  double last_price = 5;                // 目前股價
+  string dseq = 6;                      // 委託書號
+  mizar.common.Action direction = 7;    // 買賣方向
+  double pnl = 8;                       // 損益
+  string currency = 9;                  // 幣別
+  double fee = 10;                      // 交易手續費
+  int64 entry_quantity = 11;            // 新倉數量
+}
+
+// =============================================================================
+// MQ 使用 MESSAGE 定義區
+// =============================================================================
+
+// 取得保證金請求
+message GetMarginRequest {
+  // 無參數，查詢當前帳戶保證金資訊
+}
+
+// 取得保證金回應
+message GetMarginResponse {
+  MarginInfo margin_info = 1;           // 保證金資訊
+  mizar.common.ErrorCode error_code = 2;             // 錯誤代碼
+  string error_message = 3;             // 錯誤訊息
+}
+
+// 取得期貨持倉列表請求
+message GetFuturePositionListRequest {
+  // 無參數，查詢當前帳戶所有期貨持倉
+}
+
+// 期貨持倉列表回應
+message GetFuturePositionListResponse {
+  repeated FuturePosition future_positions = 1;  // 期貨持倉列表
+  mizar.common.ErrorCode error_code = 2;        // 錯誤代碼
+  string error_message = 3;                     // 錯誤訊息
+}
+
+// 取得期貨持倉明細請求
+message GetFuturePositionDetailRequest {
+  int32 detail_id = 1;                  // 明細代碼（從持倉列表取得）
+}
+
+// 期貨持倉明細回應
+message GetFuturePositionDetailResponse {
+  repeated FuturePositionDetail future_details = 1;  // 期貨持倉明細
+  mizar.common.ErrorCode error_code = 2;            // 錯誤代碼
+  string error_message = 3;                         // 錯誤訊息
+}
+
