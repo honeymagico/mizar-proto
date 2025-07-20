@@ -21,7 +21,8 @@ try {
     }
     Write-Host "Go is installed" -ForegroundColor Green
     Write-Host $goVersion -ForegroundColor White
-} catch {
+}
+catch {
     Write-Host "Error: Go not found" -ForegroundColor Red
     Write-Host "Please install Go 1.21+ and ensure it's in PATH" -ForegroundColor Red
     Write-Host "Download: https://golang.org/dl/" -ForegroundColor Yellow
@@ -36,7 +37,8 @@ try {
         throw "protoc-gen-go not found"
     }
     Write-Host "protoc-gen-go is installed" -ForegroundColor Green
-} catch {
+}
+catch {
     Write-Host "Installing protoc-gen-go..." -ForegroundColor Yellow
     go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
     if ($LASTEXITCODE -ne 0) {

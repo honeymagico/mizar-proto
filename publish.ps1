@@ -57,17 +57,8 @@ Write-Host ""
 Write-Host "準備發布版本: $Version" -ForegroundColor Green
 Write-Host ""
 
-# 檢查是否有未提交的變更
-$status = git status --porcelain
-if ($status -match "^[^?]") {
-    Write-Host "警告: 發現未提交的變更" -ForegroundColor Yellow
-    Write-Host "請先手動 commit 所有變更再發布（commit message 很重要）" -ForegroundColor Yellow
-    Read-Host "按 Enter 繼續"
-    exit 1
-}
-
-# 執行編譯測試
-Write-Host "執行編譯測試..." -ForegroundColor Cyan
+# [1/5] 執行編譯測試
+Write-Host "[1/5] 執行編譯測試..." -ForegroundColor Cyan
 & .\compile.ps1
 if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ 編譯測試失敗，發布取消" -ForegroundColor Red
@@ -75,21 +66,19 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-Write-Host ""
-Write-Host "編譯測試通過，開始發布流程..." -ForegroundColor Green
-Write-Host ""
-
-# 編譯到正式目錄
-Write-Host "[1/4] 編譯到正式目錄..." -ForegroundColor Cyan
-& .\compile.ps1
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ 正式編譯失敗" -ForegroundColor Red
+# [2/5] 檢查是否有未提交的變更
+Write-Host "[2/5] 檢查未提交變更..." -ForegroundColor Cyan
+$status = git status --porcelain
+if ($status -match "^[^?]") {
+    Write-Host "警告: 發現未提交的變更" -ForegroundColor Yellow
+    Write-Host "請先手動 commit 所有變更再發布（commit message 很重要）" -ForegroundColor Yellow
     Read-Host "按 Enter 繼續"
     exit 1
 }
+Write-Host "✓ 沒有未提交的變更" -ForegroundColor Green
 
-# 生成 Python setup.py
-Write-Host "[1.5/4] 生成 Python setup.py..." -ForegroundColor Cyan
+# [3/5] 生成 Python setup.py
+Write-Host "[3/5] 生成 Python setup.py..." -ForegroundColor Cyan
 Push-Location python/
 & .\_gen_setup.ps1 -Version $Version
 if ($LASTEXITCODE -ne 0) {
@@ -99,25 +88,24 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 Pop-Location
+Write-Host "✓ setup.py 已生成" -ForegroundColor Green
 
-# 提交編譯結果
-Write-Host "[2/4] 提交編譯結果..." -ForegroundColor Cyan
-git add go/, python/
-$status = git status --porcelain
-if ($status -match "^[^?]") {
-    git commit -m "Build: Compile proto files and generate setup.py for $Version"
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "❌ 提交編譯結果失敗" -ForegroundColor Red
-        Read-Host "按 Enter 繼續"
-        exit 1
-    }
+# [4/5] 自動提交變更
+Write-Host "[4/5] 自動提交變更..." -ForegroundColor Cyan
+git add go/, python/setup.py
+git commit -m "Build: Compile proto files and generate setup.py for $Version"
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ 自動提交失敗" -ForegroundColor Red
+    Read-Host "按 Enter 繼續"
+    exit 1
 }
-else {
-    Write-Host "沒有編譯結果需要提交" -ForegroundColor Yellow
-}
+Write-Host "✓ 變更已提交" -ForegroundColor Green
+
+# [5/5] 建立 tag 並推送到遠端
+Write-Host "[5/5] 建立 tag 並推送到遠端..." -ForegroundColor Cyan
 
 # 建立 tag
-Write-Host "[3/4] 建立 tag $Version..." -ForegroundColor Cyan
+Write-Host "  建立 tag $Version..." -ForegroundColor Cyan
 git tag -a $Version -m "Release $Version"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ 建立 tag 失敗" -ForegroundColor Red
@@ -126,7 +114,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # Push 到遠端
-Write-Host "[4/4] Push 到遠端..." -ForegroundColor Cyan
+Write-Host "  推送到遠端..." -ForegroundColor Cyan
 git push origin main
 if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ Push main 分支失敗" -ForegroundColor Red
@@ -148,10 +136,10 @@ Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "版本 $Version 已成功發布：" -ForegroundColor Green
 Write-Host "  ✓ 編譯測試通過" -ForegroundColor Green
-Write-Host "  ✓ 正式編譯完成" -ForegroundColor Green
-Write-Host "  ✓ 編譯結果已提交" -ForegroundColor Green
-Write-Host "  ✓ Tag 已建立" -ForegroundColor Green
-Write-Host "  ✓ 已推送到遠端" -ForegroundColor Green
+Write-Host "  ✓ 無未提交變更" -ForegroundColor Green
+Write-Host "  ✓ setup.py 已生成" -ForegroundColor Green
+Write-Host "  ✓ 變更已自動提交" -ForegroundColor Green
+Write-Host "  ✓ Tag 已建立並推送" -ForegroundColor Green
 Write-Host ""
 Write-Host "其他專案現在可以使用：" -ForegroundColor Cyan
 Write-Host "  go get github.com/honeymagico/mizar-proto@$Version" -ForegroundColor White
