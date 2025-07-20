@@ -233,6 +233,56 @@ func (ContractType) EnumDescriptor() ([]byte, []int) {
 	return file_mizar_info_proto_rawDescGZIP(), []int{3}
 }
 
+// 券商連線狀態
+type BrokerStatus int32
+
+const (
+	BrokerStatus_BROKER_STATUS_UNSPECIFIED BrokerStatus = 0 // 未指定
+	BrokerStatus_BROKER_STATUS_UP          BrokerStatus = 1 // 連線正常
+	BrokerStatus_BROKER_STATUS_DOWN        BrokerStatus = 2 // 連線異常
+)
+
+// Enum value maps for BrokerStatus.
+var (
+	BrokerStatus_name = map[int32]string{
+		0: "BROKER_STATUS_UNSPECIFIED",
+		1: "BROKER_STATUS_UP",
+		2: "BROKER_STATUS_DOWN",
+	}
+	BrokerStatus_value = map[string]int32{
+		"BROKER_STATUS_UNSPECIFIED": 0,
+		"BROKER_STATUS_UP":          1,
+		"BROKER_STATUS_DOWN":        2,
+	}
+)
+
+func (x BrokerStatus) Enum() *BrokerStatus {
+	p := new(BrokerStatus)
+	*p = x
+	return p
+}
+
+func (x BrokerStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (BrokerStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_mizar_info_proto_enumTypes[4].Descriptor()
+}
+
+func (BrokerStatus) Type() protoreflect.EnumType {
+	return &file_mizar_info_proto_enumTypes[4]
+}
+
+func (x BrokerStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use BrokerStatus.Descriptor instead.
+func (BrokerStatus) EnumDescriptor() ([]byte, []int) {
+	return file_mizar_info_proto_rawDescGZIP(), []int{4}
+}
+
 // 期貨帳號資訊
 type FutureAccount struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -1075,6 +1125,96 @@ func (x *GetContractResponse) GetErrorMessage() string {
 	return ""
 }
 
+// 券商健康檢查請求
+type BrokerHealthCheckRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ForceApiCheck bool                   `protobuf:"varint,1,opt,name=force_api_check,json=forceApiCheck,proto3" json:"force_api_check,omitempty"` // 是否強制向 API 查詢資料確認連線（預設 false）
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BrokerHealthCheckRequest) Reset() {
+	*x = BrokerHealthCheckRequest{}
+	mi := &file_mizar_info_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BrokerHealthCheckRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BrokerHealthCheckRequest) ProtoMessage() {}
+
+func (x *BrokerHealthCheckRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mizar_info_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BrokerHealthCheckRequest.ProtoReflect.Descriptor instead.
+func (*BrokerHealthCheckRequest) Descriptor() ([]byte, []int) {
+	return file_mizar_info_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *BrokerHealthCheckRequest) GetForceApiCheck() bool {
+	if x != nil {
+		return x.ForceApiCheck
+	}
+	return false
+}
+
+// 券商健康檢查回應
+type BrokerHealthCheckResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BrokerStatus  BrokerStatus           `protobuf:"varint,1,opt,name=broker_status,json=brokerStatus,proto3,enum=mizar.info.BrokerStatus" json:"broker_status,omitempty"` // 券商連線狀態
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BrokerHealthCheckResponse) Reset() {
+	*x = BrokerHealthCheckResponse{}
+	mi := &file_mizar_info_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BrokerHealthCheckResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BrokerHealthCheckResponse) ProtoMessage() {}
+
+func (x *BrokerHealthCheckResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mizar_info_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BrokerHealthCheckResponse.ProtoReflect.Descriptor instead.
+func (*BrokerHealthCheckResponse) Descriptor() ([]byte, []int) {
+	return file_mizar_info_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *BrokerHealthCheckResponse) GetBrokerStatus() BrokerStatus {
+	if x != nil {
+		return x.BrokerStatus
+	}
+	return BrokerStatus_BROKER_STATUS_UNSPECIFIED
+}
+
 var File_mizar_info_proto protoreflect.FileDescriptor
 
 const file_mizar_info_proto_rawDesc = "" +
@@ -1161,7 +1301,11 @@ const file_mizar_info_proto_rawDesc = "" +
 	"\tcontracts\x18\x01 \x01(\v2\x1e.mizar.info.ContractCollectionR\tcontracts\x126\n" +
 	"\n" +
 	"error_code\x18\x02 \x01(\x0e2\x17.mizar.common.ErrorCodeR\terrorCode\x12#\n" +
-	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage*Z\n" +
+	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"B\n" +
+	"\x18BrokerHealthCheckRequest\x12&\n" +
+	"\x0fforce_api_check\x18\x01 \x01(\bR\rforceApiCheck\"Z\n" +
+	"\x19BrokerHealthCheckResponse\x12=\n" +
+	"\rbroker_status\x18\x01 \x01(\x0e2\x18.mizar.info.BrokerStatusR\fbrokerStatus*Z\n" +
 	"\bExchange\x12\x18\n" +
 	"\x14EXCHANGE_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fEXCHANGE_TSE\x10\x01\x12\x10\n" +
@@ -1181,7 +1325,11 @@ const file_mizar_info_proto_rawDesc = "" +
 	"\x13CONTRACT_TYPE_STOCK\x10\x01\x12\x18\n" +
 	"\x14CONTRACT_TYPE_FUTURE\x10\x02\x12\x18\n" +
 	"\x14CONTRACT_TYPE_OPTION\x10\x03\x12\x17\n" +
-	"\x13CONTRACT_TYPE_INDEX\x10\x04B*Z(github.com/mizar/mizar-proto/proto/mizarb\x06proto3"
+	"\x13CONTRACT_TYPE_INDEX\x10\x04*[\n" +
+	"\fBrokerStatus\x12\x1d\n" +
+	"\x19BROKER_STATUS_UNSPECIFIED\x10\x00\x12\x14\n" +
+	"\x10BROKER_STATUS_UP\x10\x01\x12\x16\n" +
+	"\x12BROKER_STATUS_DOWN\x10\x02B*Z(github.com/mizar/mizar-proto/proto/mizarb\x06proto3"
 
 var (
 	file_mizar_info_proto_rawDescOnce sync.Once
@@ -1195,44 +1343,48 @@ func file_mizar_info_proto_rawDescGZIP() []byte {
 	return file_mizar_info_proto_rawDescData
 }
 
-var file_mizar_info_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_mizar_info_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_mizar_info_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
+var file_mizar_info_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_mizar_info_proto_goTypes = []any{
-	(Exchange)(0),                    // 0: mizar.info.Exchange
-	(DayTrade)(0),                    // 1: mizar.info.DayTrade
-	(OptionRight)(0),                 // 2: mizar.info.OptionRight
-	(ContractType)(0),                // 3: mizar.info.ContractType
-	(*FutureAccount)(nil),            // 4: mizar.info.FutureAccount
-	(*Stock)(nil),                    // 5: mizar.info.Stock
-	(*Future)(nil),                   // 6: mizar.info.Future
-	(*Option)(nil),                   // 7: mizar.info.Option
-	(*Index)(nil),                    // 8: mizar.info.Index
-	(*ContractCollection)(nil),       // 9: mizar.info.ContractCollection
-	(*GetFutureAccountRequest)(nil),  // 10: mizar.info.GetFutureAccountRequest
-	(*GetFutureAccountResponse)(nil), // 11: mizar.info.GetFutureAccountResponse
-	(*GetContractRequest)(nil),       // 12: mizar.info.GetContractRequest
-	(*GetContractResponse)(nil),      // 13: mizar.info.GetContractResponse
-	(ErrorCode)(0),                   // 14: mizar.common.ErrorCode
+	(Exchange)(0),                     // 0: mizar.info.Exchange
+	(DayTrade)(0),                     // 1: mizar.info.DayTrade
+	(OptionRight)(0),                  // 2: mizar.info.OptionRight
+	(ContractType)(0),                 // 3: mizar.info.ContractType
+	(BrokerStatus)(0),                 // 4: mizar.info.BrokerStatus
+	(*FutureAccount)(nil),             // 5: mizar.info.FutureAccount
+	(*Stock)(nil),                     // 6: mizar.info.Stock
+	(*Future)(nil),                    // 7: mizar.info.Future
+	(*Option)(nil),                    // 8: mizar.info.Option
+	(*Index)(nil),                     // 9: mizar.info.Index
+	(*ContractCollection)(nil),        // 10: mizar.info.ContractCollection
+	(*GetFutureAccountRequest)(nil),   // 11: mizar.info.GetFutureAccountRequest
+	(*GetFutureAccountResponse)(nil),  // 12: mizar.info.GetFutureAccountResponse
+	(*GetContractRequest)(nil),        // 13: mizar.info.GetContractRequest
+	(*GetContractResponse)(nil),       // 14: mizar.info.GetContractResponse
+	(*BrokerHealthCheckRequest)(nil),  // 15: mizar.info.BrokerHealthCheckRequest
+	(*BrokerHealthCheckResponse)(nil), // 16: mizar.info.BrokerHealthCheckResponse
+	(ErrorCode)(0),                    // 17: mizar.common.ErrorCode
 }
 var file_mizar_info_proto_depIdxs = []int32{
 	0,  // 0: mizar.info.Stock.exchange:type_name -> mizar.info.Exchange
 	1,  // 1: mizar.info.Stock.day_trade:type_name -> mizar.info.DayTrade
 	2,  // 2: mizar.info.Option.option_right:type_name -> mizar.info.OptionRight
 	0,  // 3: mizar.info.Index.exchange:type_name -> mizar.info.Exchange
-	5,  // 4: mizar.info.ContractCollection.stocks:type_name -> mizar.info.Stock
-	6,  // 5: mizar.info.ContractCollection.futures:type_name -> mizar.info.Future
-	7,  // 6: mizar.info.ContractCollection.options:type_name -> mizar.info.Option
-	8,  // 7: mizar.info.ContractCollection.indexes:type_name -> mizar.info.Index
-	4,  // 8: mizar.info.GetFutureAccountResponse.account:type_name -> mizar.info.FutureAccount
-	14, // 9: mizar.info.GetFutureAccountResponse.error_code:type_name -> mizar.common.ErrorCode
+	6,  // 4: mizar.info.ContractCollection.stocks:type_name -> mizar.info.Stock
+	7,  // 5: mizar.info.ContractCollection.futures:type_name -> mizar.info.Future
+	8,  // 6: mizar.info.ContractCollection.options:type_name -> mizar.info.Option
+	9,  // 7: mizar.info.ContractCollection.indexes:type_name -> mizar.info.Index
+	5,  // 8: mizar.info.GetFutureAccountResponse.account:type_name -> mizar.info.FutureAccount
+	17, // 9: mizar.info.GetFutureAccountResponse.error_code:type_name -> mizar.common.ErrorCode
 	3,  // 10: mizar.info.GetContractRequest.contract_type:type_name -> mizar.info.ContractType
-	9,  // 11: mizar.info.GetContractResponse.contracts:type_name -> mizar.info.ContractCollection
-	14, // 12: mizar.info.GetContractResponse.error_code:type_name -> mizar.common.ErrorCode
-	13, // [13:13] is the sub-list for method output_type
-	13, // [13:13] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	10, // 11: mizar.info.GetContractResponse.contracts:type_name -> mizar.info.ContractCollection
+	17, // 12: mizar.info.GetContractResponse.error_code:type_name -> mizar.common.ErrorCode
+	4,  // 13: mizar.info.BrokerHealthCheckResponse.broker_status:type_name -> mizar.info.BrokerStatus
+	14, // [14:14] is the sub-list for method output_type
+	14, // [14:14] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_mizar_info_proto_init() }
@@ -1246,8 +1398,8 @@ func file_mizar_info_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mizar_info_proto_rawDesc), len(file_mizar_info_proto_rawDesc)),
-			NumEnums:      4,
-			NumMessages:   10,
+			NumEnums:      5,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

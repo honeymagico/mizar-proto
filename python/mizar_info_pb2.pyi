@@ -137,6 +137,30 @@ CONTRACT_TYPE_INDEX: ContractType.ValueType  # 4
 """指數"""
 global___ContractType = ContractType
 
+class _BrokerStatus:
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
+
+class _BrokerStatusEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_BrokerStatus.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    BROKER_STATUS_UNSPECIFIED: _BrokerStatus.ValueType  # 0
+    """未指定"""
+    BROKER_STATUS_UP: _BrokerStatus.ValueType  # 1
+    """連線正常"""
+    BROKER_STATUS_DOWN: _BrokerStatus.ValueType  # 2
+    """連線異常"""
+
+class BrokerStatus(_BrokerStatus, metaclass=_BrokerStatusEnumTypeWrapper):
+    """券商連線狀態"""
+
+BROKER_STATUS_UNSPECIFIED: BrokerStatus.ValueType  # 0
+"""未指定"""
+BROKER_STATUS_UP: BrokerStatus.ValueType  # 1
+"""連線正常"""
+BROKER_STATUS_DOWN: BrokerStatus.ValueType  # 2
+"""連線異常"""
+global___BrokerStatus = BrokerStatus
+
 @typing.final
 class FutureAccount(google.protobuf.message.Message):
     """=============================================================================
@@ -534,3 +558,39 @@ class GetContractResponse(google.protobuf.message.Message):
     def ClearField(self, field_name: typing.Literal["contracts", b"contracts", "error_code", b"error_code", "error_message", b"error_message"]) -> None: ...
 
 global___GetContractResponse = GetContractResponse
+
+@typing.final
+class BrokerHealthCheckRequest(google.protobuf.message.Message):
+    """券商健康檢查請求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    FORCE_API_CHECK_FIELD_NUMBER: builtins.int
+    force_api_check: builtins.bool
+    """是否強制向 API 查詢資料確認連線（預設 false）"""
+    def __init__(
+        self,
+        *,
+        force_api_check: builtins.bool = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["force_api_check", b"force_api_check"]) -> None: ...
+
+global___BrokerHealthCheckRequest = BrokerHealthCheckRequest
+
+@typing.final
+class BrokerHealthCheckResponse(google.protobuf.message.Message):
+    """券商健康檢查回應"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    BROKER_STATUS_FIELD_NUMBER: builtins.int
+    broker_status: global___BrokerStatus.ValueType
+    """券商連線狀態"""
+    def __init__(
+        self,
+        *,
+        broker_status: global___BrokerStatus.ValueType = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["broker_status", b"broker_status"]) -> None: ...
+
+global___BrokerHealthCheckResponse = BrokerHealthCheckResponse
