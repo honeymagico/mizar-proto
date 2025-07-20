@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="mizar-proto",
-    version="0.0.5",
+    version="0.0.6",
     description="MIZAR 私有協定 Python 產生檔案（嚴禁未經授權使用、散布、修改、公開、衍生、商業行為）",
     author="MIZAR PRIVATE",
     author_email="no-reply@mizar.local",
