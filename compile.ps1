@@ -74,7 +74,7 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "Go compilation completed" -ForegroundColor Green
 
 # Compile to Python
-Write-Host "[2/2] Compiling to Python..." -ForegroundColor Cyan
+Write-Host "[2/3] Compiling to Python..." -ForegroundColor Cyan
 & "compiler\bin\win64\protoc.exe" --proto_path=proto --python_out=python proto\*.proto
 
 if ($LASTEXITCODE -ne 0) {
@@ -84,28 +84,53 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host "Python compilation completed" -ForegroundColor Green
 
+# Compile to Python with mypy types (讓PYTHON能提供程式碼自動完成的資訊)
+Write-Host "[3/3] Compiling to Python with mypy types..." -ForegroundColor Cyan
+
+# Check if uv is available
+try {
+    $null = uv --version 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        throw "uv not found"
+    }
+    Write-Host "uv is available" -ForegroundColor Green
+    
+    # Sync dependencies from pyproject.toml
+    Write-Host "Syncing dependencies..." -ForegroundColor Yellow
+    uv sync --dev
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Failed to sync dependencies" -ForegroundColor Red
+        Read-Host "按 Enter 繼續"
+        exit 1
+    }
+    
+    # Generate mypy stubs
+    Write-Host "Generating mypy stubs..." -ForegroundColor Yellow
+    uv run compiler\bin\win64\protoc.exe --proto_path=proto --mypy_out=python proto\*.proto
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "mypy stub generation failed" -ForegroundColor Red
+        Read-Host "按 Enter 繼續"
+        exit 1
+    }
+    Write-Host "mypy stubs generated" -ForegroundColor Green
+    
+}
+catch {
+    Write-Host "uv not available, skipping mypy stub generation" -ForegroundColor Yellow
+    Write-Host "To enable mypy support, install uv: https://docs.astral.sh/uv/getting-started/installation/" -ForegroundColor Yellow
+}
+
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green
 Write-Host "Compilation completed!" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "Output directories:" -ForegroundColor Cyan
-Write-Host "  - Go:     go/" -ForegroundColor White
-Write-Host "  - Python: python/" -ForegroundColor White
+Write-Host "========================================" -ForegroundColor Green
+Write-Host "Compilation completed!" -ForegroundColor Green
+Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "Generated files:" -ForegroundColor Cyan
-Write-Host "  - mizar.pb.go" -ForegroundColor White
-Write-Host "  - mizar_info.pb.go" -ForegroundColor White
-Write-Host "  - mizar_quote.pb.go" -ForegroundColor White
-Write-Host "  - mizar_portfolio.pb.go" -ForegroundColor White
-Write-Host "  - mizar_trade.pb.go" -ForegroundColor White
-Write-Host "  - mizar_stream.pb.go" -ForegroundColor White
-Write-Host "  - mizar_pb2.py" -ForegroundColor White
-Write-Host "  - mizar_info_pb2.py" -ForegroundColor White
-Write-Host "  - mizar_quote_pb2.py" -ForegroundColor White
-Write-Host "  - mizar_portfolio_pb2.py" -ForegroundColor White
-Write-Host "  - mizar_trade_pb2.py" -ForegroundColor White
-Write-Host "  - mizar_stream_pb2.py" -ForegroundColor White
+Write-Host "  - Go:     go/*.pb.go" -ForegroundColor White
+Write-Host "  - Python: python/*_pb2.py" -ForegroundColor White
+Write-Host "  - Types:  python/*_pb2.pyi" -ForegroundColor White
 Write-Host ""
-
-Read-Host "按 Enter 繼續" 
