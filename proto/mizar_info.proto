@@ -44,6 +44,13 @@ enum ContractType {
   CONTRACT_TYPE_INDEX = 4;         // 指數
 }
 
+// 券商連線狀態
+enum BrokerStatus {
+  BROKER_STATUS_UNSPECIFIED = 0;   // 未指定
+  BROKER_STATUS_UP = 1;            // 連線正常
+  BROKER_STATUS_DOWN = 2;          // 連線異常
+}
+
 // =============================================================================
 // 一般 MESSAGE 定義區
 // =============================================================================
@@ -149,4 +156,14 @@ message GetContractResponse {
   ContractCollection contracts = 1; // 合約資訊集合
   mizar.common.ErrorCode error_code = 2;         // 錯誤代碼（0=成功）
   string error_message = 3;         // 錯誤訊息
+}
+
+// 券商健康檢查請求
+message BrokerHealthCheckRequest {
+  bool force_api_check = 1;         // 是否強制向 API 查詢資料確認連線（預設 false）
+}
+
+// 券商健康檢查回應
+message BrokerHealthCheckResponse {
+  BrokerStatus broker_status = 1;   // 券商連線狀態
 } 
