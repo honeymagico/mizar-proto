@@ -92,7 +92,7 @@ Write-Host "✓ setup.py 已生成" -ForegroundColor Green
 
 # [4/5] 自動提交變更
 Write-Host "[4/5] 自動提交變更..." -ForegroundColor Cyan
-git add go/, python/setup.py
+git add go/ python/setup.py
 git commit -m "Build: Compile proto files and generate setup.py for $Version"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ 自動提交失敗" -ForegroundColor Red
