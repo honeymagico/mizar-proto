@@ -22,18 +22,21 @@ if ($Version -eq "") {
             $Version = "v$major.$minor.$patch"
             Write-Host "檢測到最新版本: $latestTag" -ForegroundColor Yellow
             Write-Host "自動遞增為: $Version" -ForegroundColor Green
-        } else {
+        }
+        else {
             Write-Host "❌ 無法解析現有版本號格式: $latestTag" -ForegroundColor Red
             Write-Host "請手動指定版本號，例如: .\publish.ps1 v1.0.1" -ForegroundColor Yellow
             Read-Host "按 Enter 繼續"
             exit 1
         }
-    } else {
+    }
+    else {
         # 沒有現有 tag，使用初始版本
         $Version = "v0.0.1"
         Write-Host "專案中沒有現有 tag，使用初始版本: $Version" -ForegroundColor Green
     }
-} else {
+}
+else {
     # 檢查指定的版本號格式
     if ($Version -notmatch "^v?(\d+)\.(\d+)\.(\d+)$") {
         Write-Host "❌ 版本號格式錯誤: $Version" -ForegroundColor Red
@@ -85,18 +88,31 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+# 生成 Python setup.py
+Write-Host "[1.5/4] 生成 Python setup.py..." -ForegroundColor Cyan
+Push-Location python/
+& .\_gen_setup.ps1 -Version $Version
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ 生成 setup.py 失敗" -ForegroundColor Red
+    Pop-Location
+    Read-Host "按 Enter 繼續"
+    exit 1
+}
+Pop-Location
+
 # 提交編譯結果
 Write-Host "[2/4] 提交編譯結果..." -ForegroundColor Cyan
 git add go/, python/
 $status = git status --porcelain
 if ($status -match "^[^?]") {
-    git commit -m "Build: Compile proto files for $Version"
+    git commit -m "Build: Compile proto files and generate setup.py for $Version"
     if ($LASTEXITCODE -ne 0) {
         Write-Host "❌ 提交編譯結果失敗" -ForegroundColor Red
         Read-Host "按 Enter 繼續"
         exit 1
     }
-} else {
+}
+else {
     Write-Host "沒有編譯結果需要提交" -ForegroundColor Yellow
 }
 

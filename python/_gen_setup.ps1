@@ -1,6 +1,19 @@
 param(
-    [string]$Version = "0.1.0"
+    [Parameter(Mandatory = $true)]
+    [string]$Version
 )
+
+# 檢查版本號格式
+if ($Version -notmatch "^v?(\d+)\.(\d+)\.(\d+)$") {
+    Write-Host "❌ 版本號格式錯誤: $Version" -ForegroundColor Red
+    Write-Host "請使用語意化版本號格式，例如: v1.0.1 或 1.0.1" -ForegroundColor Yellow
+    exit 1
+}
+
+# 移除 v 前綴（setup.py 不需要）
+if ($Version -match "^v") {
+    $Version = $Version.Substring(1)
+}
 
 # 取得所有 *_pb2.py 檔案名稱（不含副檔名）
 $pyModules = Get-ChildItem -Path . -Filter "*_pb2.py" | ForEach-Object { $_.BaseName }
